@@ -1,9 +1,18 @@
 (ns app.core
   "This namespace contains your application and is the entrypoint for 'yarn start'."
   (:require [reagent.core :as r]
+            [reitit.frontend :as rf]
+            [reitit.frontend.easy :as rfe]
+            [reitit.coercion.spec :as rss]
+            [spec-tools.data-spec :as ds]
             [ajax.core :refer [GET POST json-response-format]]))
 
 (defonce articles-state (r/atom nil))
+(defonce routes-state (r/atom nil))
+
+(comment
+  "takes route name and generates the route path, if not found returns nil"
+  (rfe/href ::login))
 
 (defonce api-uri  "https://conduit.productionready.io/api")
 
@@ -28,7 +37,12 @@
 
 (defn header []
   [:nav.navbar.navbar-light>div.container
-   [:a.navbar-brand "Conduit"]])
+   [:a.navbar-brand {:href (rfe/href ::home)} "Conduit"]
+   [:ul.nav.navbar-nav.pull-xs-right
+    [:li.nav-item
+     [:a.nav-link  {:href (rfe/href ::home)} "Home"]]
+    [:li.nav-item
+     [:a.nav-link  {:href (rfe/href ::login)} "Login"]]]])
 
 
 (defn banner [token]
@@ -85,12 +99,52 @@
       [:p "Popular tags"]]]]])
 
 
+(defn auth-signin [event]
+  (.preventDefault event)
+  (println "LOGIN"))
+
+(defn login-page []
+  [:div.auth-page>div.container.page>div.row
+   [:div.col-md-6.offset-md-3.col-xs-12
+    [:h1.text-xs-center "Sign In"]
+    [:p.text-xs-center [:a "Need an account?"]]
+    [:form {:on-submit auth-signin}
+     [:fieldset
+      [:fieldset.form-group
+       [:input.form-control.form-control-lg {:type :email :placeholder "miguel@mail.com"}]]
+      [:fieldset.form-group
+       [:input.form-control.form-control-lg {:type :password :placeholder "Your password"}]]
+      [:button.btn.btn-lg.btn-primary.pull-xs-right {:type :submit} "Sign In"]]]]])
+
+
+(def routes
+  [["/"      {:name ::home
+              :view #'home-page}]
+   ["/login" {:name ::login
+              :view #'login-page}]])
+
+;; Step 5 - write the router-start! function
+
+;; (def match (atom nil))
+;; (comment (r/render [current-page] (.getElementById js/document "app")))
+
+
+(defn router-start! []
+  (rfe/start!
+   (rf/router routes {:data {:coercion rss/coercion}})
+   (fn [matched-route] (reset! routes-state matched-route))
+   {:use-fragment false }))
+
+
+(comment (-> @routes-state :data :view))
+
 (defn app []
   ;; vector -> data
   ;; Hiccup
   [:div
    [header]
-   [home-page ]])
+   (let [current-view (->  @routes-state :data :view)]
+     [current-view])])
 
 
 (defn ^:dev/after-load render
@@ -105,5 +159,6 @@
   "Run application startup logic."
   []
   ;; runs only once, when the app starts
+  (router-start!)
   (articles-browse)
   (render))
