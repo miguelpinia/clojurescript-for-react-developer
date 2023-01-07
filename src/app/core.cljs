@@ -8,8 +8,7 @@
 (defonce api-uri  "https://conduit.productionready.io/api")
 
 (defn handler [response]
-  (let [_ (println (str "Incoming here? "))]
-    (reset! articles-state response)))
+  (reset! articles-state response))
 
 (defn error-handler [{:keys [status status-text]}]
   (.log js/console (str "something bad happened: " status " " status-text)))
@@ -24,8 +23,8 @@
   (articles-browse)
   (first (:articles (deref articles-state))))
 
-(defonce mock-articles
-  [{:title "Backpacking is fun"} {:title "Do something"}])
+;; (defonce mock-articles
+;;   [{:title "Backpacking is fun"} {:title "Do something"}])
 
 (defn header []
   [:nav.navbar.navbar-light>div.container
@@ -38,14 +37,35 @@
      [:h1.logo-front "Conduit"]
      [:p "A place to share your knowledge"]]))
 
+(defn article-preview [{:keys [title description favoritesCount author createdAt tagList]}]
+  [:div.article-preview
+   [:div.article-meta
+    [:a
+     [:img {:src (:image author)}]]
+   [:div.info
+    [:a.author (:username author)]
+    [:span.date (.toDateString (new js/Date createdAt))]]
+   [:div.pull-xs-right
+    [:button.btn.btn-sm.btn-outline-primary
+     [:i.ion-heart favoritesCount]]]]
+   [:a.preview.link
+    [:h4 title]
+    [:p description]
+    [:span "Read more..."]
+    [:ul.tag-list
+     (for [tag tagList]
+       ^{:key tag}
+       [:li.tag-default.tag-pill.tag-outline tag])]]])
+
 (defn articles [items]
   (if-not (seq items)
     [:div.article-preview "Loading..."]
     (if (= 0 (count items))
       [:div.article-preview "No articles are here... yet."]
       [:div
-       (for [article items]
-         [:h2 (:title article)])])))
+       (for [{:keys [slug] :as article} items]
+         ^{:key slug}
+         [article-preview article])])))
 
 (defn main-view []
   [:div.col-md-9
