@@ -42,7 +42,9 @@
     [:li.nav-item
      [:a.nav-link  {:href (rfe/href ::home)} "Home"]]
     [:li.nav-item
-     [:a.nav-link  {:href (rfe/href ::login)} "Login"]]]])
+     [:a.nav-link  {:href (rfe/href ::login)} "Login"]]
+    [:li.nav-item
+     [:a.nav-link  {:href (rfe/href ::register)} "Sign Up"]]]])
 
 
 (defn banner [token]
@@ -107,7 +109,7 @@
   [:div.auth-page>div.container.page>div.row
    [:div.col-md-6.offset-md-3.col-xs-12
     [:h1.text-xs-center "Sign In"]
-    [:p.text-xs-center [:a "Need an account?"]]
+    [:p.text-xs-center [:a {:href (rfe/href ::register)} "Need an account?"]]
     [:form {:on-submit auth-signin}
      [:fieldset
       [:fieldset.form-group
@@ -116,12 +118,33 @@
        [:input.form-control.form-control-lg {:type :password :placeholder "Your password"}]]
       [:button.btn.btn-lg.btn-primary.pull-xs-right {:type :submit} "Sign In"]]]]])
 
+(defn auth-signup [event]
+  (.preventDefault event)
+  (println "REGISTER"))
+
+(defn register-page []
+  [:div.auth-page>div.container.page>div.row
+   [:div.col-md-6.offset-md-3.col-xs-12
+    [:h1.text-xs-center "Sign Up"]
+    [:p.text-xs-center [:a {:href (rfe/href ::login)} "Have an account?"]]
+    [:form {:on-submit auth-signup}
+     [:fieldset
+      [:fieldset.form-group
+       [:input.form-control.form-control-lg {:type :text :placeholder "Username"}]]
+      [:fieldset.form-group
+       [:input.form-control.form-control-lg {:type :email :placeholder "email"}]]
+      [:fieldset.form-group
+       [:input.form-control.form-control-lg {:type :password :placeholder "Your password"}]]
+      [:button.btn.btn-lg.btn-primary.pull-xs-right {:type :submit} "Sign Up"]]]]])
+
 
 (def routes
   [["/"      {:name ::home
               :view #'home-page}]
    ["/login" {:name ::login
-              :view #'login-page}]])
+              :view #'login-page}]
+   ["/register" {:name ::register
+                 :view #'register-page}]])
 
 ;; Step 5 - write the router-start! function
 
