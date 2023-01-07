@@ -1,7 +1,28 @@
 (ns app.core
   "This namespace contains your application and is the entrypoint for 'yarn start'."
-  (:require [reagent.core :as r]))
+  (:require [reagent.core :as r]
+            [ajax.core :refer [GET POST json-response-format]]))
 
+(defonce articles-state (r/atom nil))
+
+(defonce api-uri  "https://conduit.productionready.io/api")
+
+(defn handler [response]
+  (let [_ (println (str "Incoming here? "))]
+    (reset! articles-state response)))
+
+(defn error-handler [{:keys [status status-text]}]
+  (.log js/console (str "something bad happened: " status " " status-text)))
+
+(defn articles-browse []
+  (GET (str api-uri "/articles?limit=20")
+       {:handler handler
+        :response-format (json-response-format {:keywords? true})
+        :error-handler error-handler}))
+
+(comment
+  (articles-browse)
+  (first (:articles (deref articles-state))))
 
 (defonce mock-articles
   [{:title "Backpacking is fun"} {:title "Do something"}])
@@ -32,7 +53,7 @@
     [:ul.nav.nav-pills.outline-active
      [:li.nav-item]
      [:a.nav-link.active {:href ""} "Global Feed"]]]
-   [articles mock-articles]])
+   [articles (:articles (deref articles-state))]])
 
 (defn home-page []
   [:div.home-page
@@ -63,4 +84,6 @@
 (defn ^:export main
   "Run application startup logic."
   []
+  ;; runs only once, when the app starts
+  (articles-browse)
   (render))
