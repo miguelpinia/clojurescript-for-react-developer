@@ -1,6 +1,7 @@
 (ns app.pages.register
   (:require
    [app.auth :as auth :refer [error-state]]
+   [app.components.list-errors :refer [list-errors]]
    [clojure.string :as s]
    [reagent.core :as r]
    [reitit.frontend.easy :as rfe]))
@@ -9,15 +10,6 @@
   (.preventDefault event)
   (auth/register! registration-input))
 
-
-(comment (for [error @error-state]
-           (s/join ", " (second error))))
-
-(defn list-errors [errors]
-  (when (seq errors)
-    [:ul.error-messages
-     (for [[key value] errors]
-       ^{:key key} [:li (str (s/capitalize (name key)) " " (s/join ", " value))])]))
 
 (defn register-page []
   (let [initial-state {:email ""
@@ -28,7 +20,7 @@
       [:div.auth-page>div.container.page>div.row
        [:div.col-md-6.offset-md-3.col-xs-12
         [:h1.text-xs-center "Sign Up"]
-        [:p.text-xs-center [:a {:href (rfe/href :login)} "Have an account?"]]
+        [:p.text-xs-center [:a {:href (rfe/href :routes/login)} "Have an account?"]]
         [list-errors @error-state]
         [:form {:on-submit #(register! % @state)}
          [:fieldset

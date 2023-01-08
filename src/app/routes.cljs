@@ -1,8 +1,13 @@
 (ns app.routes
   (:require [reagent.core :as r]
+            ;; routing
             [reitit.frontend :as rf]
             [reitit.frontend.easy :as rfe]
             [reitit.coercion.spec :as rss]
+            [reitit.frontend.controllers :as rfc]
+            ;; state
+            [app.auth :as auth ]
+            ;;pages
             [app.pages.home :refer [home-page]]
             [app.pages.login :refer [login-page]]
             [app.pages.register :refer [register-page]]
@@ -15,19 +20,38 @@
   (rfe/href ::login))
 
 (def routes
-  [["/"         {:name :home
-                 :view #'home-page}]
-   ["/login"    {:name :login
-                 :view #'login-page}]
-   ["/register" {:name :register
-                 :view #'register-page}]
-   ["/settings" {:name :settings
+  [["/"         {:name        :routes/home
+                 :view        #'home-page
+                 :controllers [{:start #(println "enter - home page")
+                                :stop  #(println "exit - home page")}]}]
+   ["/login"    {:name        :routes/login
+                 :view        #'login-page
+                 :controllers [{:start #(println "enter - login page")
+                                :stop  (fn []
+                                         (println "exit - login page")
+                                         (if (seq @auth/error-state)
+                                           (reset! auth/error-state nil)))}]}]
+   ["/register" {:name        :routes/register
+                 :view        #'register-page
+                 :controllers [{:start #(println "enter - register page")
+                                :stop  (fn []
+                                         (println "exit - register page")
+                                         (if (seq @auth/error-state)
+                                           (reset! auth/error-state nil)))}]}]
+   ["/settings" {:name :routes/settings
                  :view #'settings-page}]])
 
 (defn router-start! []
   (rfe/start!
-   (rf/router routes {:data {:coercion rss/coercion}})
-   (fn [matched-route] (reset! routes-state matched-route))
+   (rf/router routes {:data {:coercion    rss/coercion
+                             :controllers [{:start #(println "Root controller start")
+                                            :stop  #(println "Root controller stop")}]}})
+   (fn [new-match] (swap! routes-state (fn [old-match]
+                                        (if new-match
+                                          (assoc new-match :controllers
+                                                 (rfc/apply-controllers
+                                                  (:controllers old-match)
+                                                  new-match))))))
    {:use-fragment false }))
 
 (comment (-> @routes-state :data :view))

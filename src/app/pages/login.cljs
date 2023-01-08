@@ -1,15 +1,10 @@
 (ns app.pages.login
   (:require
    [app.auth :as auth :refer [error-state]]
+   [app.components.list-errors :refer [list-errors]]
    [clojure.string :as s]
    [reitit.frontend.easy :as rfe]
    [reagent.core :as r]))
-
-(defn list-errors [errors]
-  (when (seq errors)
-    [:ul.error-messages
-     (for [[key value] errors]
-       ^{:key key} [:li (str (s/capitalize (name key))  " " (s/join ", " value))])]))
 
 (defn login! [event login-input]
   (.preventDefault event)
@@ -23,7 +18,7 @@
       [:div.auth-page>div.container.page>div.row
        [:div.col-md-6.offset-md-3.col-xs-12
         [:h1.text-xs-center "Sign In"]
-        [:p.text-xs-center [:a {:href (rfe/href :register)} "Need an account?"]]
+        [:p.text-xs-center [:a {:href (rfe/href :routes/register)} "Need an account?"]]
         [list-errors @error-state]
         [:form {:on-submit #(login! % @state)}
          [:fieldset

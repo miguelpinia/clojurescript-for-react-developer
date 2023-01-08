@@ -1,7 +1,8 @@
 (ns app.auth
   (:require [reagent.core :as r]
             [app.api :refer [api-uri error-handler]]
-            [ajax.core :refer [POST json-request-format json-response-format]]))
+            [ajax.core :refer [POST json-request-format json-response-format]]
+            [reitit.frontend.easy :as rfe]))
 
 (defonce auth-state (r/atom nil))
 (defonce error-state (r/atom nil))
@@ -9,7 +10,9 @@
 (defn auth-success! [{{:keys [token] :as user} :user}]
   (.setItem js/localStorage "auth-user-token" token)
   (reset! auth-state user)
-  (reset! error-state nil))
+  (when (seq @error-state)
+    (reset! error-state nil))
+  (rfe/push-state :routes/home))
 
 (defn auth-error! [{{:keys [errors]} :response}]
   (reset! error-state errors))
