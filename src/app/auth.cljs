@@ -65,9 +65,6 @@
 ;;;;;;;;
 ;; me ;;
 ;;;;;;;;
-
-
-
 (defn get-auth-header []
   (let [token (.getItem js/localStorage "auth-user-token")]
     [:Authorization (str "Token " token)]))

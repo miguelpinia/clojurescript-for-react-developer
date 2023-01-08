@@ -33,9 +33,7 @@
     [:li.nav-item
      [:a.nav-link {:href (rfe/href :routes/register)}
       [:img.user-pic {:src image}]
-      username]]
-
-    ]])
+      username]]]])
 
 (defn header [auth-user]
   (if auth-user
