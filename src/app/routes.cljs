@@ -29,22 +29,25 @@
                  :controllers [{:start #(println "enter - login page")
                                 :stop  (fn []
                                          (println "exit - login page")
-                                         (if (seq @auth/error-state)
-                                           (reset! auth/error-state nil)))}]}]
+                                         (when (seq @auth/error-state)
+                                           (do (println "Gets invoked again")
+                                               (reset! auth/error-state nil))))}]}]
    ["/register" {:name        :routes/register
                  :view        #'register-page
                  :controllers [{:start #(println "enter - register page")
                                 :stop  (fn []
                                          (println "exit - register page")
-                                         (if (seq @auth/error-state)
-                                           (reset! auth/error-state nil)))}]}]
+                                         (when (seq @auth/error-state)
+                                           (do (println "Gets invoked again")
+                                               (reset! auth/error-state nil))))}]}]
    ["/settings" {:name :routes/settings
                  :view #'settings-page}]])
 
 (defn router-start! []
   (rfe/start!
    (rf/router routes {:data {:coercion    rss/coercion
-                             :controllers [{:start #(println "Root controller start")
+                             :controllers [{:start (fn []
+                                                     (auth/me))
                                             :stop  #(println "Root controller stop")}]}})
    (fn [new-match] (swap! routes-state (fn [old-match]
                                         (if new-match

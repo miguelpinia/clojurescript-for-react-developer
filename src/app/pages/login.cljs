@@ -12,8 +12,9 @@
   (auth/login! login-input))
 
 (defn login-page []
-  (let [initial-state {:email "" :password ""}
-        state (r/atom initial-state)]
+  (let [initial-state {:email    ""
+                       :password ""}
+        state         (r/atom initial-state)]
     (fn []
       [:div.auth-page>div.container.page>div.row
        [:div.col-md-6.offset-md-3.col-xs-12
@@ -24,14 +25,14 @@
          [:fieldset
           [:fieldset.form-group
            [:input.form-control.form-control-lg
-            {:type :email
-             :value (:email @state)
-             :on-change #(swap! state assoc :email (.. % -target -value))
+            {:type        :email
+             :value       (:email @state)
+             :on-change   #(swap! state assoc :email (.. % -target -value))
              :placeholder "my-email@mail.com"}]]
           [:fieldset.form-group
            [:input.form-control.form-control-lg
-            {:type :password
-             :value (:password @state)
-             :on-change #(swap! state assoc :password (.. % -target -value))
+            {:type        :password
+             :value       (:password @state)
+             :on-change   #(swap! state assoc :password (.. % -target -value))
              :placeholder "Your password"}]]
           [:button.btn.btn-lg.btn-primary.pull-xs-right {:type :submit} "Sign In"]]]]])))

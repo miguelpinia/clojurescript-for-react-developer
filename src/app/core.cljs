@@ -3,7 +3,8 @@
   (:require [reagent.core :as r]
             [app.layout :refer [app]]
             [app.routes :refer [router-start!]]
-            [app.articles :refer [articles-browse]]))
+            [app.articles :refer [articles-browse]]
+            [app.auth :as auth]))
 
 
 (defn ^:dev/after-load render
@@ -19,5 +20,6 @@
   []
   ;; runs only once, when the app starts
   (router-start!)
+  (auth/me)
   (articles-browse)
   (render))

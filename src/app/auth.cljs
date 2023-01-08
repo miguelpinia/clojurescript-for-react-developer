@@ -1,7 +1,7 @@
 (ns app.auth
   (:require [reagent.core :as r]
             [app.api :refer [api-uri error-handler]]
-            [ajax.core :refer [POST json-request-format json-response-format]]
+            [ajax.core :refer [POST GET json-request-format json-response-format]]
             [reitit.frontend.easy :as rfe]))
 
 (defonce auth-state (r/atom nil))
@@ -61,3 +61,29 @@
 ;; (reset! error-state nil)
 
 (comment @error-state)
+
+;;;;;;;;
+;; me ;;
+;;;;;;;;
+
+
+
+(defn get-auth-header []
+  (let [token (.getItem js/localStorage "auth-user-token")]
+    [:Authorization (str "Token " token)]))
+
+(defn get-me-success! [{user :user}]
+  (reset! auth-state user))
+
+(defn get-me-error! [error]
+  (rfe/push-state :routes/home))
+
+(defn me []
+  (GET (str api-uri "/user")
+       {:handler get-me-success!
+        :headers (get-auth-header)
+        :response-format (json-response-format {:keywords? true})
+        :error-handler get-me-error!}))
+
+
+(comment (me))
