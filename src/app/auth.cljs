@@ -4,10 +4,34 @@
             [ajax.core :refer [POST json-request-format json-response-format]]))
 
 (defonce auth-state (r/atom nil))
+(defonce error-state (r/atom nil))
 
 (defn auth-success! [{{:keys [token] :as user} :user}]
   (.setItem js/localStorage "auth-user-token" token)
-  (reset! auth-state user))
+  (reset! auth-state user)
+  (reset! error-state nil))
+
+(defn auth-error! [{{:keys [errors]} :response}]
+  (reset! error-state errors))
+
+(defn login! [input] ;; {:email "" :password ""}
+  (POST (str api-uri "/users/login")
+        {:params {:user input}
+         :handler auth-success!
+         :format (json-request-format)
+         :response-format (json-response-format {:keywords? true})
+         :error-handler auth-error!}))
+
+(comment (login!  {:email "learnuidev3@foo.com"
+                   :password "Foo bar"}))
+
+(defn register! [input]
+  (POST (str api-uri "/users")
+        {:params {:user input}
+         :handler auth-success!
+         :format (json-request-format)
+         :response-format (json-response-format {:keywords? true})
+         :error-handler auth-error!}))
 
 (comment
   "Saving value into local storage"
@@ -27,25 +51,10 @@
 
 (comment (:token @auth-state))
 
-(defn login! [input] ;; {:email "" :password ""}
-  (POST (str api-uri "/users/login")
-        {:params {:user input}
-         :handler auth-success!
-         :format (json-request-format)
-         :response-format (json-response-format {:keywords? true})
-         :error-handler error-handler}))
-
-(comment (login!  {:email "learnuidev3@foo.com"
-                   :password "Foo bar"}))
-
-(defn register! [input]
-  (POST (str api-uri "/users")
-        {:params {:user input}
-         :handler auth-success!
-         :format (json-request-format)
-         :response-format (json-response-format {:keywords? true})
-         :error-handler error-handler}))
-
 (comment (register! {:username "learnuidev7@foo.com"
                      :email "learnuidev7@foo.com"
                      :password "Foo bar"}))
+
+;; (reset! error-state nil)
+
+(comment @error-state)

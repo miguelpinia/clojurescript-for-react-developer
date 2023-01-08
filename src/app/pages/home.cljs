@@ -5,7 +5,7 @@
 
 (defn home-page []
   [:div.home-page
-   [banner "auth-user-token"]
+   [banner "Conduit" "auth-user-token"]
    [:div.container.page>div.row
     [main-view]
     [:div.col-md-3
