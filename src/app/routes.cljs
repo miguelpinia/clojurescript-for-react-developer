@@ -7,6 +7,7 @@
             [reitit.frontend.controllers :as rfc]
             ;; state
             [app.auth :as auth ]
+            [app.profile :as profile]
             ;;pages
             [app.pages.home :refer [home-page]]
             [app.pages.login :refer [login-page]]
@@ -49,10 +50,11 @@
    ["/user/@:username" {:name        :routes/profile
                         :view        #'profile-page
                         :parameters  {:path {:username string?}}
-                        :controllers [{:params (fn [match] (:path (:parameters match)))
-                                       :start  (fn [{:keys [username] :as props}]
-                                                 (println "Entering Profile of -" username )
-                                                 (reset! temp props))}]}]])
+                        :controllers [{:identity (fn [match] (:path (:parameters match)))
+                                       :start    (fn [{:keys [username] :as props}]
+                                                   (profile/fetch! username)
+                                                   (println "Entering Profile of -" username )
+                                                   (reset! temp props))}]}]])
 
 (defn router-start! []
   (rfe/start!
