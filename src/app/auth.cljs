@@ -1,7 +1,7 @@
 (ns app.auth
   (:require [reagent.core :as r]
             [app.api :refer [api-uri error-handler]]
-            [ajax.core :refer [POST GET json-request-format json-response-format]]
+            [ajax.core :refer [POST GET PUT json-request-format json-response-format]]
             [reitit.frontend.easy :as rfe]))
 
 (defonce auth-state (r/atom nil))
@@ -81,6 +81,25 @@
         :headers (get-auth-header)
         :response-format (json-response-format {:keywords? true})
         :error-handler get-me-error!}))
+
+;; save user
+(defn save-user! [input] ;; {:email "" :password ""}
+  (PUT (str api-uri "/user")
+        {:params {:user input}
+         :handler get-me-success!
+         :error-handler get-me-error!
+         :headers (get-auth-header)
+         :format (json-request-format)
+         :response-format (json-response-format {:keywords? true})}))
+
+(def example-user {:image    ""
+                :username ""
+                :bio      ""
+                :email    ""
+                :password ""})
+
+(comment (save-user! {:url "www.learnuidev.com"
+                      :bio "Some biography. I teach clojurescript"}))
 
 
 (comment (me))

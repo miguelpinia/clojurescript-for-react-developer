@@ -1,13 +1,24 @@
 (ns app.pages.settings
   (:require [reitit.frontend.easy :as rfe]
-            [app.auth :as auth :refer [auth-state]]
+            [app.auth :as auth :refer [auth-state save-user!]]
             [reagent.core :as r]))
 
 (defn save-user [event user]
   (.preventDefault event)
-  (println user))
+  (save-user! user))
 
+;; next step: Save user info
 (comment @auth-state)
+
+(def initial-state {:image    ""
+                :username ""
+                :bio      ""
+                :email    ""
+                :password ""})
+
+;; (def state (r/atom nil))
+
+;; (comment @state)
 
 (defn settings-form [user]
   (let [state (r/atom user)]
@@ -54,7 +65,8 @@
   [:div.settings-page>div.container.page>div.row
    [:div.col-md-6.offset-md-3.col-xs-12
     [:h1.text-xs-center "Your settings"]
-    [settings-form @auth-state]
+    (when @auth-state
+      [settings-form @auth-state])
     [:hr]
     [:button.btn.btn-outline-danger
      {:on-click logout}
