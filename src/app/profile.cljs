@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]
             [app.api :refer [api-uri error-handler]]
             [app.auth :refer [get-auth-header]]
-            [ajax.core :refer [GET json-request-format json-response-format]]))
+            [ajax.core :refer [POST GET DELETE json-request-format json-response-format]]))
 
 
 (defonce profile-state (r/atom nil))
@@ -26,3 +26,25 @@
   (fetch! "diddy_")
   @profile-state
   @error-state)
+
+
+(defn follow! [username]
+  (POST (str api-uri "/profiles/" username "/follow")
+        {:handler         fetch-success!
+         :headers         (get-auth-header)
+         :response-format (json-response-format {:keywords? true})
+         :error-handler   fetch-error!}))
+
+(defn unfollow! [username]
+  (DELETE (str api-uri "/profiles/" username "/follow")
+          {:handler         fetch-success!
+           :headers         (get-auth-header)
+           :response-format (json-response-format {:keywords? true})
+           :error-handler   fetch-error!}))
+
+;; http://localhost:4200/user/@Anah%20Bene%C5%A1ov%C3%A1
+
+(comment
+  (follow! "Anah Benešová")
+  (unfollow! "Anah Benešová")
+  @profile-state)
