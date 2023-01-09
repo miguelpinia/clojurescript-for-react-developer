@@ -2,8 +2,7 @@
   (:require [reitit.frontend.easy :as rfe]))
 
 (defn article-preview [{:keys [title description username favoritesCount author createdAt tagList] :as data}]
-  (let [username (:username author)
-        _ (println author)]
+  (let [username (:username author)]
     (fn []
       [:div.article-preview
        [:div.article-meta

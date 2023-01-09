@@ -21,5 +21,4 @@
   ;; runs only once, when the app starts
   (router-start!)
   (auth/me)
-  (articles-browse)
   (render))

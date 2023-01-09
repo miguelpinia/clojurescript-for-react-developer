@@ -19,9 +19,9 @@
 (defn articles-browse []
   (reset! loading-state true)
   (GET (str api-uri "/articles?limit=20")
-       {:handler handler
+       {:handler         handler
         :response-format (json-response-format {:keywords? true})
-        :error-handler error-handler}))
+        :error-handler   error-handler}))
 
 (comment
   (articles-browse)
@@ -30,7 +30,32 @@
 (defn articles-feed []
   (reset! loading-state true)
   (GET (str api-uri "/articles/feed?limit=10&offset=0")
-       {:handler handler
-        :headers (get-auth-header)
+       {:handler         handler
+        :headers         (get-auth-header)
         :response-format (json-response-format {:keywords? true})
-        :error-handler error-handler}))
+        :error-handler   error-handler}))
+
+(defn limit [total page]
+  (str "limit=" total "&offset=" (or (* page total) 0)))
+
+(limit 5 0)
+
+(defn fetch-by [author page]
+  (reset! loading-state true)
+  (GET (str api-uri "/articles?author=" (js/encodeURIComponent author) "&" (limit 5 page))
+       {:handler         handler
+        :headers         (get-auth-header)
+        :response-format (json-response-format {:keywords? true})
+        :error-handler   error-handler}))
+
+(comment (fetch-by "diddy_" 1))
+
+(defn favourited-by [author page]
+  (reset! loading-state true)
+  (GET (str api-uri "/articles?favorited=" (js/encodeURIComponent author) "&" (limit 5 page))
+       {:handler         handler
+        :headers         (get-auth-header)
+        :response-format (json-response-format {:keywords? true})
+        :error-handler   error-handler}))
+
+(comment (favourited-by "diddy_" 1))

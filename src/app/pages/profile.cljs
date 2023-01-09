@@ -1,9 +1,12 @@
 (ns app.pages.profile
   (:require
+   [app.articles :refer [articles-state loading-state fetch-by favourited-by]]
    [app.profile :refer [profile-state follow! unfollow!]]
    [app.auth :refer [auth-state]]
+   [app.components.articles :refer [articles]]
    [goog.string :as gstring]
-   [reitit.frontend.easy :as rfe]))
+   [reitit.frontend.easy :as rfe]
+   [reagent.core :as r]))
 
 ;; (def elems [1 2 3 4 5])
 
@@ -29,14 +32,27 @@
 
 (defn follow-user-button [user? user]
   (when-not user?
-    [:button {:class ["btn btn-sm action-btn"
-                      (if (:following user)
-                        "btn-secondary"
-                        "btn-outline-scondary")]
+    [:button {:class    ["btn btn-sm action-btn"
+                         (if (:following user)
+                           "btn-secondary"
+                           "btn-outline-scondary")]
               :on-click #(toggle-follow user)}
      [:i.ion-plus-round]
      (gstring/unescapeEntities "&nbsp;")
      (if (:following user) "Unfollow" "Follow")]))
+
+(defonce tab-state (r/atom :author))
+
+(defn fetch-author [username]
+  (do
+    (reset! tab-state :author)
+    (fetch-by username 0)))
+
+(defn fetch-favourited [username]
+  (do
+    (reset! tab-state :favourited)
+    (favourited-by username 0)))
+
 
 (defn profile-page []
   (let [user? (= (:username @auth-state)
@@ -54,6 +70,14 @@
         [:div.articles-toggle
          [:ul.nav.nav-pills.outline-active
           [:li.nav-item
-           [:a.nav-link.active "My Articles"]]
+           [:a {:class ["nav-link" (when (= @tab-state :author) "active")]
+                :on-click #(fetch-author (:username @profile-state))}
+            "My Articles"]]
           [:li.nav-item
-           [:a.nav-link "Favourited Articles"]]]]]])))
+           [:a {:class ["nav-link" (when (= @tab-state :favourited) "active")]
+                :on-click #(fetch-favourited (:username @profile-state))}
+            "Favourited Articles"]]
+          ]]
+        [articles {:articles (:articles (deref articles-state))
+              :loading? @loading-state}]]
+       ])))
