@@ -54,7 +54,10 @@
                                        :start    (fn [{:keys [username] :as props}]
                                                    (profile/fetch! username)
                                                    (println "Entering Profile of -" username )
-                                                   (reset! temp props))}]}]])
+                                                   (reset! temp props))
+                                       :stop (fn [{:keys [username]}]
+                                               (println "Exit profile of - " username)
+                                               (reset! profile/profile-state nil))}]}]])
 
 (defn router-start! []
   (rfe/start!

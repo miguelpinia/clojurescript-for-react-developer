@@ -25,12 +25,12 @@
            ^{:key tag}
            [:li.tag-default.tag-pill.tag-outline tag])]]])))
 
-(defn articles [items]
-  (if-not (seq items)
+(defn articles [{:keys [articles loading?] :as items}]
+  (if loading?
     [:div.article-preview "Loading..."]
-    (if (= 0 (count items))
+    (if (= 0 (count articles))
       [:div.article-preview "No articles are here... yet."]
       [:div
-       (for [{:keys [slug] :as article} items]
+       (for [{:keys [slug] :as article} articles]
          ^{:key slug}
          [article-preview article])])))
