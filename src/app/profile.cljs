@@ -1,7 +1,6 @@
 (ns app.profile
   (:require [reagent.core :as r]
-            [app.api :refer [api-uri error-handler]]
-            [app.auth :refer [get-auth-header]]
+            [app.api :refer [api-uri error-handler get-auth-header]]
             [ajax.core :refer [POST GET DELETE json-request-format json-response-format]]))
 
 

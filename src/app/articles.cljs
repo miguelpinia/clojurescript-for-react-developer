@@ -1,12 +1,11 @@
 (ns app.articles
   (:require [reagent.core :as r]
-            [app.api :refer [api-uri]]
-            [app.auth :refer [get-auth-header]]
+            [app.api :refer [api-uri get-auth-header]]
             [ajax.core :refer [GET json-response-format]]))
 
 (defonce articles-state (r/atom nil))
 (defonce loading-state (r/atom false))
-
+(defonce tab-state (r/atom :all))
 
 (defn handler [response]
   (reset! loading-state false)
@@ -20,6 +19,7 @@
   (reset! loading-state true)
   (GET (str api-uri "/articles?limit=20")
        {:handler         handler
+        :headers         (get-auth-header)
         :response-format (json-response-format {:keywords? true})
         :error-handler   error-handler}))
 
@@ -40,13 +40,15 @@
 
 (limit 5 0)
 
-(defn fetch-by [author page]
-  (reset! loading-state true)
-  (GET (str api-uri "/articles?author=" (js/encodeURIComponent author) "&" (limit 5 page))
-       {:handler         handler
-        :headers         (get-auth-header)
-        :response-format (json-response-format {:keywords? true})
-        :error-handler   error-handler}))
+(defn fetch-by
+  ([author] (fetch-by author 0))
+  ([author page]
+   (reset! loading-state true)
+   (GET (str api-uri "/articles?author=" (js/encodeURIComponent author) "&" (limit 5 page))
+        {:handler         handler
+         :headers         (get-auth-header)
+         :response-format (json-response-format {:keywords? true})
+         :error-handler   error-handler})))
 
 (comment (fetch-by "diddy_" 1))
 

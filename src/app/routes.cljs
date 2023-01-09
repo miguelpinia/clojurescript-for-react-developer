@@ -6,8 +6,11 @@
             [reitit.coercion.spec :as rss]
             [reitit.frontend.controllers :as rfc]
             ;; state
-            [app.auth :as auth ]
+            [app.api :refer [get-token]]
+            [app.articles :as articles]
+            [app.auth :as auth]
             [app.profile :as profile]
+
             ;;pages
             [app.pages.home :refer [home-page]]
             [app.pages.login :refer [login-page]]
@@ -27,7 +30,14 @@
 (def routes
   [["/"         {:name        :routes/home
                  :view        #'home-page
-                 :controllers [{:start #(println "enter - home page")
+                 :controllers [{:start (fn []
+                                         (if (get-token)
+                                           (do
+                                             (reset! articles/tab-state :feed)
+                                             (articles/articles-feed))
+                                           (do
+                                             (reset! articles/tab-state :all)
+                                             (articles/articles-browse))))
                                 :stop  #(println "exit - home page")}]}]
    ["/login"    {:name        :routes/login
                  :view        #'login-page
@@ -53,11 +63,12 @@
                         :controllers [{:identity (fn [match] (:path (:parameters match)))
                                        :start    (fn [{:keys [username] :as props}]
                                                    (profile/fetch! username)
+                                                   (articles/fetch-by username)
                                                    (println "Entering Profile of -" username )
                                                    (reset! temp props))
-                                       :stop (fn [{:keys [username]}]
-                                               (println "Exit profile of - " username)
-                                               (reset! profile/profile-state nil))}]}]])
+                                       :stop     (fn [{:keys [username]}]
+                                                   (println "Exit profile of - " username)
+                                                   (reset! profile/profile-state nil))}]}]])
 
 (defn router-start! []
   (rfe/start!

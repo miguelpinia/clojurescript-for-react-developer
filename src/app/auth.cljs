@@ -1,6 +1,6 @@
 (ns app.auth
   (:require [reagent.core :as r]
-            [app.api :refer [api-uri error-handler]]
+            [app.api :refer [api-uri error-handler get-auth-header]]
             [ajax.core :refer [POST GET PUT json-request-format json-response-format]]
             [reitit.frontend.easy :as rfe]))
 
@@ -65,9 +65,7 @@
 ;;;;;;;;
 ;; me ;;
 ;;;;;;;;
-(defn get-auth-header []
-  (let [token (.getItem js/localStorage "auth-user-token")]
-    [:Authorization (str "Token " token)]))
+
 
 (defn get-me-success! [{user :user}]
   (reset! auth-state user))
